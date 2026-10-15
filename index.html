@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Легенды футбола</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: var(--tg-theme-bg-color, #ffffff);
+    --bg2: var(--tg-theme-secondary-bg-color, #f1f2f5);
+    --text: var(--tg-theme-text-color, #111418);
+    --hint: var(--tg-theme-hint-color, #7b8794);
+    --radius: 24px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg2);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+    -webkit-font-smoothing: antialiased;
+  }
+  header { text-align: center; padding: 8px 0 20px; }
+  header h1 { margin: 0; font-size: 26px; letter-spacing: -.02em; }
+  header p { margin: 6px 0 0; color: var(--hint); font-size: 15px; }
+
+  .cards { display: grid; gap: 20px; max-width: 520px; margin: 0 auto; }
+
+  .card {
+    background: var(--bg);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,.08);
+    opacity: 0; transform: translateY(24px);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .card.in { opacity: 1; transform: none; }
+
+  .hero {
+    position: relative;
+    padding: 22px 20px 20px;
+    color: var(--fg);
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    overflow: hidden;
+    min-height: 168px;
+  }
+  .hero .num {
+    position: absolute; right: -6px; top: -26px;
+    font-size: 190px; font-weight: 900; line-height: 1;
+    opacity: .16; letter-spacing: -.06em;
+    pointer-events: none; user-select: none;
+  }
+  .hero .flag { font-size: 34px; line-height: 1; }
+  .hero h2 { margin: 12px 0 2px; font-size: 32px; letter-spacing: -.02em; line-height: 1.05; }
+  .hero .full { font-size: 13px; opacity: .8; }
+  .hero .meta { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill {
+    font-size: 12.5px; font-weight: 600;
+    padding: 5px 10px; border-radius: 999px;
+    background: rgba(255,255,255,.22);
+    backdrop-filter: blur(6px);
+  }
+  .hero.dark-text .pill { background: rgba(0,0,0,.12); }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 14px 14px 4px; }
+  .stat { background: var(--bg2); border-radius: 16px; padding: 12px 8px; text-align: center; }
+  .stat b { display: block; font-size: 24px; letter-spacing: -.02em; color: var(--c1); }
+  .stat span { display: block; margin-top: 3px; font-size: 11.5px; line-height: 1.25; color: var(--hint); }
+
+  .tabs { display: flex; margin: 14px 14px 0; padding: 3px; background: var(--bg2); border-radius: 12px; }
+  .tab {
+    flex: 1; border: 0; background: none; color: var(--hint);
+    font: inherit; font-size: 14.5px; font-weight: 600;
+    padding: 9px 0; border-radius: 10px; cursor: pointer;
+    transition: background .2s, color .2s;
+  }
+  .tab.active { background: var(--bg); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+
+  .list { list-style: none; margin: 0; padding: 12px 14px 18px; display: grid; gap: 4px; }
+  .list li { display: flex; gap: 12px; padding: 10px 4px; font-size: 15px; line-height: 1.4; animation: fade .3s ease; }
+  .list li + li { border-top: 1px solid var(--bg2); }
+  .list .ico { flex: none; width: 26px; text-align: center; font-size: 18px; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  footer { text-align: center; color: var(--hint); font-size: 12px; margin: 22px auto 0; max-width: 520px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>⚽ Легенды футбола</h1>
+  <p>Четыре звезды — достижения и факты</p>
+</header>
+
+<main class="cards" id="cards"></main>
+<footer>Статистика приблизительно актуальна на 2025 год</footer>
+
+<script>
+const players = [
+  {
+    name: "Лионель Месси", full: "Lionel Andrés Messi", flag: "🇦🇷", num: 10,
+    c1: "#4a90d9", c2: "#9fd0f5", fg: "#0b2540", darkText: true,
+    meta: ["Нападающий", "Интер Майами", "Сборная Аргентины"],
+    stats: [["8", "«Золотых мячей»"], ["672", "гола за «Барселону»"], ["2022", "чемпион мира"]],
+    wins: [
+      ["🏆", "Чемпион мира 2022 и обладатель «Золотого мяча» турнира — в 2014 и 2022 годах"],
+      ["⚽", "8 «Золотых мячей» (2009–2012, 2015, 2019, 2021, 2023) — абсолютный рекорд"],
+      ["🌎", "Кубок Америки 2021 и 2024, Финалиссима 2022, олимпийское золото 2008"],
+      ["🔵", "4 победы в Лиге чемпионов и 10 чемпионств Ла Лиги с «Барселоной»"],
+      ["📈", "91 гол за календарный 2012 год — рекорд в истории футбола"],
+    ],
+    facts: [
+      ["📝", "Первый контракт с «Барселоной» в 13 лет был написан на салфетке"],
+      ["💉", "В детстве у него был дефицит гормона роста — клуб оплатил лечение"],
+      ["🟥", "Дебют за сборную Аргентины закончился удалением через 47 секунд"],
+      ["🐜", "Прозвище «Ла Пульга» («Блоха») — за рост и ловкость"],
+      ["5️⃣", "В 2012 году забил 5 мячей в одном матче Лиги чемпионов — «Байеру»"],
+    ],
+  },
+  {
+    name: "Криштиану Роналду", full: "Cristiano Ronaldo dos Santos Aveiro", flag: "🇵🇹", num: 7,
+    c1: "#b3122b", c2: "#0e7a3b", fg: "#ffffff", darkText: false,
+    meta: ["Нападающий", "Аль-Наср", "Сборная Португалии"],
+    stats: [["5", "«Золотых мячей»"], ["140", "голов в Лиге чемпионов"], ["5", "побед в ЛЧ"]],
+    wins: [
+      ["⚽", "5 «Золотых мячей» (2008, 2013, 2014, 2016, 2017)"],
+      ["🏆", "5 побед в Лиге чемпионов: 1 с «Манчестер Юнайтед» и 4 с «Реалом»"],
+      ["🇵🇹", "Чемпион Европы 2016, обладатель Лиги наций 2019 и 2025"],
+      ["🌍", "Чемпион Англии, Испании и Италии — в трёх сильнейших лигах"],
+      ["⚪", "Лучший бомбардир «Реала» за всю историю — 450 голов"],
+    ],
+    facts: [
+      ["✈️", "Аэропорт на Мадейре носит его имя — с 2017 года"],
+      ["🎬", "Второе имя Роналду дали в честь актёра и президента США Рональда Рейгана"],
+      ["🌐", "Первый человек, преодолевший 500 млн подписчиков в Instagram"],
+      ["🩸", "Не делает татуировки, чтобы оставаться донором крови"],
+      ["🔟", "Первый футболист, забивавший на пяти чемпионатах мира подряд"],
+    ],
+  },
+  {
+    name: "Неймар", full: "Neymar da Silva Santos Júnior", flag: "🇧🇷", num: 10,
+    c1: "#0a8f3c", c2: "#f4d90a", fg: "#ffffff", darkText: false,
+    meta: ["Нападающий", "Сантос", "Сборная Бразилии"],
+    stats: [["79", "голов за сборную"], ["€222м", "рекордный трансфер"], ["2016", "олимпийское золото"]],
+    wins: [
+      ["🥇", "Олимпийское золото 2016 — забил решающий пенальти в финале с Германией"],
+      ["🔵", "Победа в Лиге чемпионов 2015 и требл в составе «Барселоны»"],
+      ["🇧🇷", "Второй бомбардир в истории сборной Бразилии — обошёл Пеле в 2023 году"],
+      ["💶", "С 2017 года переход в «ПСЖ» остаётся самым дорогим в истории — €222 млн"],
+      ["🏅", "Кубок Либертадорес 2011 с «Сантосом» и приз Пушкаша за лучший гол года"],
+    ],
+    facts: [
+      ["👶", "Дебютировал за «Сантос» в 17 лет"],
+      ["🔱", "Трио MSN (Месси, Суарес, Неймар) забило 122 гола за сезон 2014/15"],
+      ["🤕", "На ЧМ-2014 сломал позвонок в матче с Колумбией и пропустил полуфинал"],
+      ["🏠", "В 2025 году вернулся в родной «Сантос»"],
+      ["💇", "Известен смелыми причёсками — фанаты ждут каждой новой"],
+    ],
+  },
+  {
+    name: "Роберт Левандовски", full: "Robert Lewandowski", flag: "🇵🇱", num: 9,
+    c1: "#c2122e", c2: "#e8e8ee", fg: "#ffffff", darkText: false,
+    meta: ["Нападающий", "Барселона", "Сборная Польши"],
+    stats: [["41", "гол — рекорд Бундеслиги"], ["5 за 9′", "мячей «Вольфсбургу»"], ["2", "«Золотые бутсы»"]],
+    wins: [
+      ["📈", "41 гол в сезоне Бундеслиги 2020/21 — побил рекорд Герда Мюллера, державшийся 49 лет"],
+      ["🏆", "Победа в Лиге чемпионов 2020 с «Баварией» и 10 титулов чемпиона Германии"],
+      ["👟", "«Золотая бутса» Европы — 2021 и 2022"],
+      ["🌟", "Лучший игрок мира по версии ФИФА в 2020 и 2021 годах"],
+      ["🇵🇱", "Лучший бомбардир в истории сборной Польши — более 80 голов"],
+    ],
+    facts: [
+      ["⏱️", "В 2015 году забил 5 мячей «Вольфсбургу» за 9 минут — рекорд Бундеслиги"],
+      ["🥋", "Жена Анна — чемпионка Польши по карате, отец был дзюдоистом"],
+      ["🚪", "В юности академия «Легии» отказалась от него — он начинал в третьем дивизионе"],
+      ["🔄", "Играл за «Дортмунд» и «Баварию»; в 2022 году перешёл в «Барселону»"],
+      ["🍽️", "Строго следит за питанием и режимом — поэтому остаётся в форме после 35"],
+    ],
+  },
+];
+
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  try { tg.setHeaderColor("secondary_bg_color"); tg.setBackgroundColor("secondary_bg_color"); } catch (e) {}
+}
+const haptic = () => { try { tg.HapticFeedback.selectionChanged(); } catch (e) {} };
+
+const root = document.getElementById("cards");
+
+function listHtml(items) {
+  return items.map(([i, t]) => `<li><span class="ico">${i}</span><span>${t}</span></li>`).join("");
+}
+
+players.forEach(p => {
+  const el = document.createElement("article");
+  el.className = "card";
+  el.style.setProperty("--c1", p.c1);
+  el.style.setProperty("--c2", p.c2);
+  el.style.setProperty("--fg", p.fg);
+  el.innerHTML = `
+    <div class="hero${p.darkText ? " dark-text" : ""}">
+      <div class="num">${p.num}</div>
+      <div class="flag">${p.flag}</div>
+      <h2>${p.name}</h2>
+      <div class="full">${p.full}</div>
+      <div class="meta">${p.meta.map(m => `<span class="pill">${m}</span>`).join("")}</div>
+    </div>
+    <div class="stats">${p.stats.map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+    <div class="tabs">
+      <button class="tab active" data-tab="wins">🏆 Достижения</button>
+      <button class="tab" data-tab="facts">💡 Факты</button>
+    </div>
+    <ul class="list">${listHtml(p.wins)}</ul>`;
+
+  const list = el.querySelector(".list");
+  el.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => {
+    if (btn.classList.contains("active")) return;
+    el.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b === btn));
+    list.innerHTML = listHtml(p[btn.dataset.tab]);
+    haptic();
+  }));
+  root.appendChild(el);
+});
+
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll(".card").forEach(c => io.observe(c));
+</script>
+</body>
+</html>
